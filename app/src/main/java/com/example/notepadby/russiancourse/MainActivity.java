@@ -1,4 +1,4 @@
-package com.example.notepadby.russiancourse;
+package com.example.notepadby.android;
 
 import android.app.Activity;
 import android.content.Intent;

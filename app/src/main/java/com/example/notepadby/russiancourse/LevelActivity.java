@@ -1,4 +1,4 @@
-package com.example.notepadby.russiancourse;
+package com.example.notepadby.android;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -7,14 +7,18 @@ import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
+import android.text.style.ForegroundColorSpan;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +31,9 @@ import java.util.Locale;
 public class LevelActivity extends Activity {
 
     boolean taskFinished = false;
+    private int mTouchX;
+    private int mTouchY;
+    private final static int DEFAULT_SELECTION_LEN = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +42,12 @@ public class LevelActivity extends Activity {
         ((TextView) findViewById(R.id.taskNumber)).setText("Задание 1");
         ((TextView) findViewById(R.id.taskView)).setText("Выделите в тексте слова с ошибками");
         ((TextView) findViewById(R.id.taskText)).setText("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
+       // ((EditText) findViewById(R.id.editText)).setSelection(10,20);
         init();
     }
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -111,15 +122,17 @@ public class LevelActivity extends Activity {
                 .next()) {
             String possibleWord = definition.substring(start, end);
             if (Character.isLetterOrDigit(possibleWord.charAt(0))) {
-                ClickableSpan clickSpan = getClickableSpan(possibleWord);
-                TextPaint ds = new TextPaint();
-                ds.setUnderlineText(false);
-                clickSpan.updateDrawState(ds);
-                spans.setSpan(clickSpan, start, end,
+                
+                spans.setSpan(new ForegroundColorSpan(Color.RED), start, end,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                /*Spannable spannable = new SpannableString("1234567890");
+                spannable.setSpan(new ForegroundColorSpan(Color.BLUE), 0, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                ((TextView) findViewById(R.id.taskText)).setText(spannable);*/
             }
         }
     }
+
 
     private ClickableSpan getClickableSpan(final String word) {
         return new ClickableSpan() {
