@@ -1,10 +1,9 @@
-package com.example.notepadby.android;
+package com.example.notepadby.russiancourse;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -15,17 +14,14 @@ import android.text.style.ForegroundColorSpan;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
-import org.w3c.dom.Text;
 
 import java.text.BreakIterator;
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class LevelActivity extends Activity {
@@ -34,6 +30,10 @@ public class LevelActivity extends Activity {
     private int mTouchX;
     private int mTouchY;
     private final static int DEFAULT_SELECTION_LEN = 5;
+    ArrayList<Integer> starts = new ArrayList<>();
+    ArrayList<Integer> ends = new ArrayList<>();
+    boolean firstIteration = true;
+    ArrayList<Boolean> colored = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,10 +42,22 @@ public class LevelActivity extends Activity {
         ((TextView) findViewById(R.id.taskNumber)).setText("Задание 1");
         ((TextView) findViewById(R.id.taskView)).setText("Выделите в тексте слова с ошибками");
         ((TextView) findViewById(R.id.taskText)).setText("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
-       // ((EditText) findViewById(R.id.editText)).setSelection(10,20);
+        ((TextView) findViewById(R.id.taskText)).setText("12 34 567 890");
         init();
     }
 
+
+    public String getUserAnswers() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < colored.size(); i++) {
+            if (colored.get(i)) {
+                sb.append('1');
+            } else {
+                sb.append('0');
+            }
+        }
+        return sb.toString();
+    }
 
 
 
@@ -122,28 +134,65 @@ public class LevelActivity extends Activity {
                 .next()) {
             String possibleWord = definition.substring(start, end);
             if (Character.isLetterOrDigit(possibleWord.charAt(0))) {
-                
-                spans.setSpan(new ForegroundColorSpan(Color.RED), start, end,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-                /*Spannable spannable = new SpannableString("1234567890");
-                spannable.setSpan(new ForegroundColorSpan(Color.BLUE), 0, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                ((TextView) findViewById(R.id.taskText)).setText(spannable);*/
+                Toast.makeText(LevelActivity.this,start+"   "+end,Toast.LENGTH_LONG).show();
+                if(firstIteration) {
+                    starts.add(start);
+                    ends.add(end);
+                    ClickableSpan clickSpan = getClickableSpan(possibleWord, start, end);
+                    TextPaint ds = new TextPaint();
+                    ds.setUnderlineText(false);
+                    ds.setColor(Color.BLACK);
+                    clickSpan.updateDrawState(ds);
+                    spans.setSpan(clickSpan, start, end,
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }else{
+
+                }
             }
         }
+        firstIteration=false;
+        for(int i=0; i < starts.size();i++){
+            colored.add(false);
+        }
+        Toast.makeText(LevelActivity.this,starts.size()+"",Toast.LENGTH_LONG).show();
     }
 
 
-    private ClickableSpan getClickableSpan(final String word) {
+    private ClickableSpan getClickableSpan(final String word, final int start, final int end) {
         return new ClickableSpan() {
             final String mWord;
+            final int mStart;
+            final int mEnd;
+
             {
+                mEnd = end;
+                mStart = start;
                 mWord = word;
             }
 
             @Override
             public void onClick(View widget) {
-                Toast.makeText(LevelActivity.this,"tapped on:"+ mWord, Toast.LENGTH_LONG).show();
+                int count = 0;
+                for (int i = 0; i < starts.size(); i++) {
+                    if (starts.get(i) == start) {
+                        count = i;
+                        break;
+                    }
+                }
+                if (!colored.get(count)) {
+                    TextView textView = (TextView) findViewById(R.id.taskText);
+                    Spannable WordtoSpan = new SpannableString(textView.getText());
+                    WordtoSpan.setSpan(new ForegroundColorSpan(Color.BLACK), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    textView.setText(WordtoSpan);
+                    colored.set(count,true);
+                } else if (colored.get(count)) {
+                    TextView textView = (TextView) findViewById(R.id.taskText);
+                    Spannable WordtoSpan = new SpannableString(textView.getText());
+                    WordtoSpan.setSpan(new ForegroundColorSpan(Color.RED), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    textView.setText(WordtoSpan);
+                    colored.set(count, false);
+                }
             }
 
             public void updateDrawState(TextPaint ds) {
